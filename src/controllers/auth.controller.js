@@ -1,6 +1,7 @@
 const User = require('../models/user')
 const {validateSignupData} = require('../utils/validation')
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
 
 //Handle user registration
 const userRegister = async (req,res) => {
@@ -72,10 +73,50 @@ const userRegister = async (req,res) => {
 }
 
 //Handle user login
+const userLogin = async (req,res) => {
+    try{
+        const {email,password} = req.body
+        if(!email || !password){
+            return res.status(400).json({
+                status:false,
+                message:"Email and password is required."
+            })
+        }
+        const user = await User.findOne({email:email});
+        if(!user){
+            return res.status(401).json({
+                status:false,
+                message:"Invalid Credentials"
+            })
+        } else {
+            const isValidUser = await bcrypt.compare(password,user.password)
+            if(isValidUser){
+                const token = jwt.sign({_id:user._id},"Devconnect@4efgrrggtt")//data to hide,secret key
+                res.cookie("token",token)
+                return res.status(200).json({
+                    status:true,
+                    message:"Login Successfully."
+                })
+            } else {
+                return res.status(401).json({
+                    status:false,
+                    message:"Invalid Credentials"
+                })
+
+            }
+        }
+    } catch(err){
+        console.error(err);
+        return res.status(500).json({
+            message:err.message
+        })
+    }
+}
 
 
 //Handle user logout
 
 module.exports = {
-    userRegister
+    userRegister,
+    userLogin
 }

@@ -2,17 +2,20 @@ const express = require("express")//import express from node modules
 const app = express();
 const connectDb = require("./config/dbConfig")//import database connection module
 require("dotenv").config();
-const {userRegister} = require('./controllers/auth.controller')
+const cookieParser = require('cookie-parser') 
+const {userRegister,userLogin} = require('./controllers/auth.controller')
 const {getAllFeeds} = require('./controllers/user.controller')
 const {getProfile,editProfile} = require('./controllers/profile.controller')
 
 //middleware for converting the json to javascript object for every API
 app.use(express.json())
+app.use(cookieParser())
 
 
 //routes START *****************
 
 app.post("/signup", userRegister)//Handle user registration
+app.post("/login",userLogin)//Handle user login
 app.get("/feeds", getAllFeeds)//Handle getting feeds
 app.get('/profile/view/:userId',getProfile)//Handle view user profile
 app.patch('/profile/edit',editProfile)//Handle edit user profile

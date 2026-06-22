@@ -4,6 +4,8 @@ const User = require('../models/user')
 const getProfile = async(req,res) => {
     try{
         if(req.params?.userId){
+            const cookies = req.cookies;
+            console.log(cookies);
             const userId = req.params?.userId;
             const profile = await User.findById(userId)
             return res.status(200).json({
