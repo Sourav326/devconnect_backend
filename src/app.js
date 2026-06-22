@@ -1,6 +1,8 @@
 const express = require("express")//import express from node modules
 const connectDb = require("./config/database")//import database connection module
 const app = express();
+const {validateSignupData} = require('./utils/validation')
+const bcrypt = require('bcrypt');
 
 const User = require('./models/user')
 
@@ -10,16 +12,68 @@ app.use(express.json())
 
 //API for handling signup START **********************
 app.post("/signup", async (req,res) => {
-    const user = new User(req.body)//creating instance of user model
     try{
+        //validation of data
+        validateSignupData(req);
+
+        //extract all fields
+        const {
+            firstName,
+            lastName,
+            email,
+            password,
+            mobile,
+            dob,
+            profilePictures,
+            gender,
+            interestedIn,
+            lookingFor,
+            interests,
+            location,
+            occupation,
+            height,
+            bio
+        } = req.body;
+
+        //check is email already exist
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "Email already exists"
+            });
+        }
+
+        //encrypt the password
+        const passwordHash = await bcrypt.hash(password,10);
+
+        //save the user
+        const user = new User({
+            firstName,
+            lastName,
+            email,
+            password:passwordHash,
+            mobile,
+            dob,
+            profilePictures,
+            gender,
+            interestedIn,
+            lookingFor,
+            interests,
+            location,
+            occupation,
+            height,
+            bio
+        })//creating instance of user model
         await user.save()
-        res.status(200).json({
+        return res.status(201).json({//201 for creating a resource
             success:true,
             message:"User created Successfully"
         })
     } catch(err){
-        res.status(500).json({
-            message:"Internal server error"
+        console.error(err);
+        return res.status(500).json({
+            message:err.message
         })
     }
 })
@@ -57,10 +111,10 @@ app.get("/feeds",async(req,res) => {
 
 
 //API for handling view single user START ****************
-app.get('/user',async (req,res) => {
+app.get('/user/:userId',async (req,res) => {
     try{
-        if(req.body){
-            const userId = req.body.id;
+        if(req.params?.userId){
+            const userId = req.params?.userId;
             const user = await User.findById(userId)
             res.status(200).json({
                 status:true,
