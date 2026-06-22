@@ -2,7 +2,7 @@ const mongoose = require('mongoose')//import mongoose from node modules
 const userSchema = new mongoose.Schema({//create mongoose schema
     firstName:{
         type:String,
-        require:true,
+        required:true,
         trim:true
     },
     lastName:{
