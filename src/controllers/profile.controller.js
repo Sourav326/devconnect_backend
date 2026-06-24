@@ -1,29 +1,19 @@
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 //handle user profile view
 const getProfile = async(req,res) => {
     try{
-        if(req.params?.userId){
-            const cookies = req.cookies;
-            console.log(cookies);
-            const userId = req.params?.userId;
-            const profile = await User.findById(userId)
-            return res.status(200).json({
-                status:true,
-                message:'Profile fetched successfully.',
-                data:profile
-            })
-        } else {
-            return res.status(404).json({
-                status:true,
-                message:"No profile found",
-                data:[]
-            })
-            
-        }
+        const profile = req.user;
+        return res.status(200).json({
+            status:true,
+            message:'Profile fetched successfully.',
+            data:profile
+        })
     } catch(err){
         console.error(err);
         return res.status(500).json({
+            status:false,
             message:err.message
         })
     }

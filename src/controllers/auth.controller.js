@@ -91,7 +91,7 @@ const userLogin = async (req,res) => {
         } else {
             const isValidUser = await bcrypt.compare(password,user.password)
             if(isValidUser){
-                const token = jwt.sign({_id:user._id},"Devconnect@4efgrrggtt")//data to hide,secret key
+                const token = await jwt.sign({_id:user._id},process.env.JWT_SECRET,{ expiresIn: '1d' })//data to hide,secret key, expiry time 1 day
                 res.cookie("token",token)
                 return res.status(200).json({
                     status:true,

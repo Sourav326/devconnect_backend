@@ -3,21 +3,22 @@ const app = express();
 const connectDb = require("./config/dbConfig")//import database connection module
 require("dotenv").config();
 const cookieParser = require('cookie-parser') 
-const {userRegister,userLogin} = require('./controllers/auth.controller')
 const {getAllFeeds} = require('./controllers/user.controller')
 const {getProfile,editProfile} = require('./controllers/profile.controller')
+const {userAuth} = require('./middlewares/checkAuth.middlewares')
 
 //middleware for converting the json to javascript object for every API
 app.use(express.json())
 app.use(cookieParser())
 
+const authRouter = require('./routes/auth.routes')
+
 
 //routes START *****************
 
-app.post("/signup", userRegister)//Handle user registration
-app.post("/login",userLogin)//Handle user login
-app.get("/feeds", getAllFeeds)//Handle getting feeds
-app.get('/profile/view/:userId',getProfile)//Handle view user profile
+app.use('/',authRouter)
+app.get("/feeds", getAllFeeds)//Handle getting feeds(url,function)
+app.get('/profile/view',userAuth,getProfile)//Handle view user profile (url,middleware,function)
 app.patch('/profile/edit',editProfile)//Handle edit user profile
 
 //routes END ********************
