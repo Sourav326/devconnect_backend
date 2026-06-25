@@ -12,7 +12,7 @@ const userAuth = async (req,res,next) => {
         }
         const decodedObject = await jwt.verify(token, process.env.JWT_SECRET);
         const {_id} = decodedObject;
-        const user = await User.findById(_id).select("-_id -password -email -mobile -isVerified -isActive -lastSeen -createdAt -updatedAt -__v")
+        const user = await User.findById(_id).select("-password -email -mobile -isVerified -isActive -lastSeen -createdAt -updatedAt -__v")
         if(!user){
             throw new Error('User not available')
         }

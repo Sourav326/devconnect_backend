@@ -24,7 +24,6 @@ const editProfile = async(req,res) => {
     try{
         //extract all fields
         const {
-            userId,
             firstName,
             lastName,
             dob,
@@ -37,43 +36,39 @@ const editProfile = async(req,res) => {
             occupation,
             height,
             bio
-        } = req.body;
+        } = req.body;//from request by user
 
-        if (!userId) {
-            return res.status(400).json({
-                success: false,
-                message: "User id is required"
-            });
-        }
-        const updatedUser = await User.findByIdAndUpdate(userId,{
-            firstName,
-            lastName,
-            dob,
-            profilePictures,
-            gender,
-            interestedIn,
-            lookingFor,
-            interests,
-            location,
-            occupation,
-            height,
-            bio
-        },
-        {
-            new: true
-        }
-        ).select("-password -email -mobile");
-        if (!updatedUser) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
+        const loggedInUser = req.user;//from middleware
+
+        Object.keys(req.body).forEach((key) => {loggedInUser[key] = req.body[key]})
+        await loggedInUser.save()
+
+        // const updatedUser = await User.findByIdAndUpdate(_id,{
+        //     firstName,
+        //     lastName,
+        //     dob,
+        //     profilePictures,
+        //     gender,
+        //     interestedIn,
+        //     lookingFor,
+        //     interests,
+        //     location,
+        //     occupation,
+        //     height,
+        //     bio
+        // }
+        // ).select("-password -email -mobile");
+        // if (!updatedUser) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: "User not found"
+        //     });
+        // }
 
         return res.status(200).json({
             success: true,
-            message: "Profile updated successfully",
-            data: updatedUser
+            message: req.user.firstName+" profile updated successfully",
+            data: loggedInUser
         });
     }catch(err){
         return res.status(500).json({
